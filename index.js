@@ -4,6 +4,7 @@ import mongoose from 'mongoose'
 import { StatusCodes } from 'http-status-codes'
 import cors from 'cors'
 import userRoute from './routes/user.js'
+import productRouter from './routes/product.js'
 import './passport.js'
 
 mongoose
@@ -33,6 +34,7 @@ app.use((error, req, res, _next) => {
 
 // 路由
 app.use('/user', userRoute)
+app.use('/product', productRouter)
 
 // 處理未定義的路由
 app.all(/.*/, (req, res) => {

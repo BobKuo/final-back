@@ -72,3 +72,14 @@ export const token = (req, res, next) => {
     next()
   })(req, res, next)
 }
+
+export const admin = (req, res, next) => {
+  // 檢查使用者是否為管理員
+  if (req.user.role !== 'admin') {
+    return res.status(StatusCodes.FORBIDDEN).json({
+      success: false,
+      message: '沒有權限存取此資源',
+    })
+  }
+  next()
+}
