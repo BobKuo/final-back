@@ -32,8 +32,8 @@ const schema = new Schema(
       default: true,
       required: [true, '是否上架是必填的'],
     },
-    image: {
-      type: String,
+    images: {
+      type: [String],
       required: [true, '商品圖片是必填的'],
     },
   },

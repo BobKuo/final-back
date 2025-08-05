@@ -11,7 +11,8 @@ export const create = async (req, res) => {
       category: req.body.category,
       sell: req.body.sell,
       // 使用上傳的檔案 Cloudinary 網址
-      image: req.file?.path,
+      // 支援單檔或多檔上傳
+      images: req.file ? [req.file.path] : req.files ? req.files.map((file) => file.path) : [],
     })
     res.status(StatusCodes.CREATED).json({
       success: true,
@@ -36,6 +37,7 @@ export const create = async (req, res) => {
   }
 }
 
+// 含未上架的商品
 export const getAll = async (req, res) => {
   try {
     const products = await Product.find()
@@ -54,6 +56,7 @@ export const getAll = async (req, res) => {
   }
 }
 
+// 僅取得上架的商品
 export const get = async (req, res) => {
   try {
     const products = await Product.find({ sell: true })

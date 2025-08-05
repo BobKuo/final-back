@@ -35,7 +35,7 @@ const upload = multer({
   },
 })
 
-export default (req, res, next) => {
+export const uploadOne = (req, res, next) => {
   upload.single('image')(req, res, (error) => {
     // 處理上傳錯誤
     if (error) {
@@ -56,25 +56,27 @@ export default (req, res, next) => {
     console.log('上傳成功:', req.file)
     next()
   })
+}
 
-  // upload.array('images', 5)(req, res, (error) => {
-  //   // 處理上傳錯誤
-  //   if (error) {
-  //     console.error('上傳錯誤:', error)
-  //     return res.status(StatusCodes.BAD_REQUEST).json({
-  //       success: false,
-  //       message: '檔案上傳失敗，請確保檔案類型為 JPEG 或 PNG，且大小不超過 1MB',
-  //     })
-  //   }
-  //   // 如果沒有上傳檔案，回傳錯誤
-  //   if (!req.files || req.files.length === 0) {
-  //     return res.status(StatusCodes.BAD_REQUEST).json({
-  //       success: false,
-  //       message: '請上傳至少一個檔案',
-  //     })
-  //   }
-  //   // 繼續下一步
-  //   console.log('上傳成功:', req.files)
-  //   next()
-  // })
+export const uploadImgs = (req, res, next) => {
+  upload.array('images', 5)(req, res, (error) => {
+    // 處理上傳錯誤
+    if (error) {
+      console.error('上傳錯誤:', error)
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: '檔案上傳失敗，請確保檔案類型為 JPEG 或 PNG，且大小不超過 1MB',
+      })
+    }
+    // 如果沒有上傳檔案，回傳錯誤
+    if (!req.files || req.files.length === 0) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: '請上傳至少一個檔案',
+      })
+    }
+    // 繼續下一步
+    console.log('上傳成功:', req.files)
+    next()
+  })
 }
