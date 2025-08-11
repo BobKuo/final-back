@@ -12,7 +12,7 @@ export const create = async (req, res) => {
       sell: req.body.sell,
       // 使用上傳的檔案 Cloudinary 網址
       // 支援單檔或多檔上傳
-      images: req.file ? [req.file.path] : req.files ? req.files.map((file) => file.path) : [],
+      images: req.files ? req.files.map((file) => file.path) : [],
     })
     res.status(StatusCodes.CREATED).json({
       success: true,
@@ -82,17 +82,27 @@ export const update = async (req, res) => {
       throw new Error('PRODUCT ID')
     }
 
+    // 先從資料庫中取得商品資料
+    const existingProduct = await Product.findById(req.params.id).orFail(
+      new Error('PRODUCT NOT FOUND'),
+    )
+
+    const updatedImages = req.files
+      ? [...existingProduct.images, ...req.files.map((file) => file.path)] // 合併原有圖片與新上傳圖片
+      : undefined // 如果沒有新圖片，設為undefined，不會更新
+
+    console.log('更新的圖片:', updatedImages)
+
     const product = await Product.findByIdAndUpdate(
-      req.params.id,
+      req.params.id, // router.patch('/:id' ,在這邊設定req.params.id
       {
+        // 使用展開運算符將 req.body 的內容展開
         ...req.body,
-        // 更新不一定要傳圖片，沒有傳圖片就是用舊的
-        // 如果沒有傳圖片，就不會有 req.file，就會是 undefined，不會更新
-        // 如果有傳圖片，就會用新的圖片路徑
-        image: req.file?.path,
+        // 更新圖片
+        images: updatedImages,
       },
       {
-        new: true,
+        new: true, // 是否回傳更新後的資料
         runValidators: true,
       },
     ).orFail(new Error('PRODUCT NOT FOUND'))
