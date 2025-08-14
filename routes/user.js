@@ -10,7 +10,7 @@ router.post('/login', auth.login, user.login)
 router.get('/profile', auth.token, user.profile)
 router.patch('/refresh', auth.token, user.refresh)
 router.delete('/logout', auth.token, user.logout)
-// router.patch('/cart', auth.token, user.cart)
-// router.get('/cart', auth.token, user.getCart)
+router.patch('/cart', auth.token, user.cart)
+router.get('/cart', auth.token, user.getCart)
 
 export default router
