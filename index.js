@@ -5,6 +5,7 @@ import { StatusCodes } from 'http-status-codes'
 import cors from 'cors'
 import userRoute from './routes/user.js'
 import productRouter from './routes/product.js'
+import orderRouter from './routes/order.js'
 import './passport.js'
 
 mongoose
@@ -35,6 +36,7 @@ app.use((error, req, res, _next) => {
 // 路由
 app.use('/user', userRoute)
 app.use('/product', productRouter)
+app.use('/order', orderRouter)
 
 // 處理未定義的路由
 app.all(/.*/, (req, res) => {
@@ -44,6 +46,6 @@ app.all(/.*/, (req, res) => {
   })
 })
 
-app.listen(process.env.PORT || 4000, () => {
-  console.log('伺服器啟動', process.env.PORT || 4000)
+app.listen(process.env.PORT || 5000, () => {
+  console.log('伺服器啟動', process.env.PORT || 5000)
 })
