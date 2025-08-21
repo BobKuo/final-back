@@ -14,8 +14,12 @@ cloudinary.config({
 const upload = multer({
   storage: new CloudinaryStorage({
     cloudinary,
-    params: {
-      folder: 'products', // 上傳到 cloudinary 的資料夾名稱
+    params: async (req) => {
+      // 根據 req 的內容動態設定資料夾名稱
+      const folderName = req.body.folder || 'default' // 使用 req.body.category 作為資料夾名稱，若無則使用 'default'
+      return {
+        folder: folderName, // 動態設定資料夾名稱
+      }
     },
   }),
   // req = 請求資訊
@@ -31,7 +35,7 @@ const upload = multer({
     }
   },
   limits: {
-    fileSize: 1024 * 1024, // 限制檔案大小為 1MB
+    fileSize: 5 * 1024 * 1024, // 限制檔案大小為 5MB
   },
 })
 
@@ -42,7 +46,7 @@ export const uploadImgs = (req, res, next) => {
       console.error('上傳錯誤:', error)
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: '檔案上傳失敗，請確保檔案類型為 JPEG 或 PNG，且大小不超過 1MB',
+        message: '檔案上傳失敗，請確保檔案類型為 JPEG 或 PNG，且大小不超過 5MB',
       })
     }
     // 如果沒有上傳檔案，回傳錯誤 (更新時允許沒有上傳檔案 所以此處註解掉)
