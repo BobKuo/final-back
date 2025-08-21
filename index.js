@@ -6,6 +6,8 @@ import cors from 'cors'
 import userRoute from './routes/user.js'
 import productRouter from './routes/product.js'
 import orderRouter from './routes/order.js'
+import workRouter from './routes/work.js'
+import tagRouter from './routes/tag.js'
 import './passport.js'
 
 mongoose
@@ -37,6 +39,8 @@ app.use((error, req, res, _next) => {
 app.use('/user', userRoute)
 app.use('/product', productRouter)
 app.use('/order', orderRouter)
+app.use('/work', workRouter)
+app.use('/tag', tagRouter)
 
 // 處理未定義的路由
 app.all(/.*/, (req, res) => {
@@ -46,6 +50,6 @@ app.all(/.*/, (req, res) => {
   })
 })
 
-app.listen(process.env.PORT || 5000, () => {
-  console.log('伺服器啟動', process.env.PORT || 5000)
+app.listen(process.env.PORT || 4000, () => {
+  console.log('伺服器啟動', process.env.PORT || 4000)
 })

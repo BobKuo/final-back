@@ -1,8 +1,24 @@
 import { Schema, model } from 'mongoose'
 
+const statisticsSchema = new Schema(
+  {
+    views: {
+      type: Number,
+      required: [true, '點擊數是必填的'],
+      min: [0, '點擊數不能為負數'],
+    },
+    likes: {
+      type: [Schema.Types.ObjectId],
+      ref: 'users',
+      required: [true, '使用者 ID 是必填的'],
+    },
+  },
+  { versionKey: false },
+)
+
 const schema = new Schema(
   {
-    title: {
+    name: {
       type: String,
       required: [true, '標題是必填的'],
       trim: true,
@@ -11,7 +27,6 @@ const schema = new Schema(
     },
     content: {
       type: String,
-      required: [true, '內容是必填的'],
       maxlength: [500, '內容最多只能有 500 個字元'],
     },
     category: {
@@ -33,12 +48,16 @@ const schema = new Schema(
     },
     tags: {
       type: [String],
-      required: [true, '標籤是必填的'],
     },
     post: {
       type: Boolean,
       default: true,
       required: [true, '是否張貼是必填的'],
+    },
+    statistics: {
+      type: statisticsSchema,
+      default: { views: 0, likes: [] },
+      required: [true, '統計資料是必填的'],
     },
     images: {
       type: [String],

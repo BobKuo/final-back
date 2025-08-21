@@ -5,6 +5,7 @@ const schema = new Schema(
     name: {
       type: String,
       required: [true, '名稱是必填的'],
+      unique: true,
       trim: true,
       minlength: [1, '名稱至少需要 1 個字元'],
       maxlength: [10, '名稱最多只能有 10 個字元'],

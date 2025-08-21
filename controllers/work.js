@@ -1,15 +1,17 @@
 import Work from '../models/work.js'
 import { StatusCodes } from 'http-status-codes'
 import validator from 'validator'
+import { deleteCloudOne } from '../utils/cloudimg.js'
 
 export const create = async (req, res) => {
   try {
     const work = await Work.create({
-      title: req.body.title,
+      name: req.body.name,
       content: req.body.content,
       category: req.body.category,
       tags: req.body.tags,
       post: req.body.post,
+      statistics: req.body.statistics,
       // 使用上傳的檔案 Cloudinary 網址
       // 支援單檔或多檔上傳
       images: req.files ? req.files.map((file) => file.path) : [],
@@ -85,9 +87,34 @@ export const update = async (req, res) => {
     // 先從資料庫中取得作品資料
     const existingWork = await Work.findById(req.params.id).orFail(new Error('WORK NOT FOUND'))
 
-    const updatedImages = req.files
-      ? [...existingWork.images, ...req.files.map((file) => file.path)] // 合併原有圖片與新上傳圖片
-      : undefined // 如果沒有新圖片，設為undefined，不會更新
+    // 如果有刪除圖片的需求，先處理刪除圖片
+    const delimgs = JSON.parse(req.body.deletedImages || '[]')
+
+    if (delimgs.length > 0) {
+      for (const url of delimgs) {
+        // 確保url在 existingWork.images 中
+        if (existingWork.images.includes(url)) {
+          // 刪除 Cloudinary 上的圖片
+          const id = url.split('/').pop().split('.')[0] // 取得圖片的 public_id
+          const publicId = req.body.folder ? req.body.folder + '/' + id : id // 如果有設定資料夾，則加上資料夾名稱
+
+          console.log('刪除圖片的 publicId:', publicId)
+          // 呼叫刪除圖片的函式
+          deleteCloudOne(publicId)
+
+          // 更新 existingWork.images
+          existingWork.images = existingWork.images.filter((image) => image !== url) // 移除已刪除的圖片網址
+        }
+      }
+    }
+
+    console.log('更新後的圖片陣列:', existingWork.images)
+
+    // 如果有上傳新圖片，則合併原有圖片與新上傳的圖片
+    const updatedImages =
+      req.files.length > 0 || delimgs.length > 0
+        ? [...existingWork.images, ...req.files.map((file) => file.path)] // 合併原有圖片與新上傳圖片
+        : undefined // 如果沒有新圖片，設為undefined，不會更新
 
     console.log('更新的圖片:', updatedImages)
 
