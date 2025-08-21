@@ -5,21 +5,31 @@ import { deleteCloudOne } from '../utils/cloudimg.js'
 
 export const create = async (req, res) => {
   try {
-    const work = await Work.create({
+    const created = await Work.create({
       name: req.body.name,
       content: req.body.content,
       category: req.body.category,
-      tags: req.body.tags,
+      tags: JSON.parse(req.body.tags),
       post: req.body.post,
       statistics: req.body.statistics,
       // 使用上傳的檔案 Cloudinary 網址
       // 支援單檔或多檔上傳
       images: req.files ? req.files.map((file) => file.path) : [],
     })
+
+    // 再查詢並 populate tags
+    const work = await Work.findById(created._id).populate('tags', 'name')
+
+    // 取得標籤名稱的陣列
+    const tags = work.tags.map((tag) => tag.name)
+
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: '作品建立成功',
-      work,
+      work: {
+        ...work.toObject(),
+        tags, // 用名稱陣列取代原本的 tags
+      },
     })
   } catch (error) {
     console.log('controllers/work.js create')
@@ -42,11 +52,18 @@ export const create = async (req, res) => {
 // 含未上架的商品
 export const getAll = async (req, res) => {
   try {
-    const works = await Work.find()
+    const works = await Work.find().populate('tags', 'name') // 取得 tags 的名稱
+
+    // 取得標籤名稱的陣列
+    const worksWithTags = works.map((work) => ({
+      ...work.toObject(),
+      tags: work.tags.map((tag) => tag.name), // 用名稱陣列取代原本的 tags
+    }))
+
     res.status(StatusCodes.OK).json({
       success: true,
       message: '商品列表取得成功',
-      works,
+      works: worksWithTags,
     })
   } catch (error) {
     console.log('controllers/work.js getAll')
@@ -123,6 +140,8 @@ export const update = async (req, res) => {
       {
         // 使用展開運算符將 req.body 的內容展開
         ...req.body,
+        // 更新標籤
+        tags: JSON.parse(req.body.tags),
         // 更新圖片
         images: updatedImages,
       },
@@ -130,12 +149,20 @@ export const update = async (req, res) => {
         new: true, // 是否回傳更新後的資料
         runValidators: true,
       },
-    ).orFail(new Error('WORK NOT FOUND'))
+    )
+      .populate('tags', 'name')
+      .orFail(new Error('WORK NOT FOUND'))
+
+    // 回傳時只給 tag 名稱陣列
+    const tags = work.tags.map((tag) => tag.name)
 
     res.status(StatusCodes.OK).json({
       success: true,
       message: '作品更新成功',
-      work,
+      work: {
+        ...work.toObject(),
+        tags,
+      },
     })
   } catch (error) {
     console.log('controllers/work.js update')

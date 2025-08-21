@@ -46,9 +46,12 @@ const schema = new Schema(
         message: '請選擇有效的分類',
       },
     },
-    tags: {
-      type: [String],
-    },
+    tags: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'tags',
+      },
+    ],
     post: {
       type: Boolean,
       default: true,

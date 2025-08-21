@@ -27,4 +27,4 @@ const schema = new Schema(
   { versionKey: false, timestamps: true },
 )
 
-export default model('tag', schema)
+export default model('tags', schema)
