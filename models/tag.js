@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose'
+import Work from './work.js'
 
 const schema = new Schema(
   {
@@ -26,5 +27,17 @@ const schema = new Schema(
   },
   { versionKey: false, timestamps: true },
 )
+
+// 刪除標籤時，從所有相關的作品中移除該標籤
+schema.post('findOneAndDelete', async function (doc) {
+  if (doc) {
+    // 從所有包含該 tag 的 works 中移除
+    await Work.updateMany(
+      { tags: doc._id }, // 條件：tags 陣列中包含該 tag 的 _id
+      { $pull: { tags: doc._id } }, // 從 tags 陣列中移除該 tag 的 _id
+    )
+    console.log(`Tag ${doc._id} 已從相關的 works 中移除`)
+  }
+})
 
 export default model('tags', schema)

@@ -52,18 +52,18 @@ export const create = async (req, res) => {
 // 含未上架的商品
 export const getAll = async (req, res) => {
   try {
-    const works = await Work.find().populate('tags', 'name') // 取得 tags 的名稱
+    const works = await Work.find().populate('tags') // 取得 tags 的名稱
 
     // 取得標籤名稱的陣列
-    const worksWithTags = works.map((work) => ({
+    const worksWithEnabledTags = works.map((work) => ({
       ...work.toObject(),
-      tags: work.tags.map((tag) => tag.name), // 用名稱陣列取代原本的 tags
+      tags: work.tags.map((tag) => ({ _id: tag._id, name: tag.name, enable: tag.enable })),
     }))
 
     res.status(StatusCodes.OK).json({
       success: true,
       message: '商品列表取得成功',
-      works: worksWithTags,
+      works: worksWithEnabledTags,
     })
   } catch (error) {
     console.log('controllers/work.js getAll')
