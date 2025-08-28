@@ -103,8 +103,8 @@ export const update = async (req, res) => {
       existingSeries.cover = ''
     }
 
-    // 如果有上傳新圖片，則合併原有圖片與新上傳的圖片
-    const updatedImage = req.file?.path
+    //  如果沒有新圖片，設為undefined，不會更新
+    const updatedImage = req.file?.path || existingSeries.cover
 
     const series = await Series.findByIdAndUpdate(
       req.params.id, // router.patch('/:id' ,在這邊設定req.params.id

@@ -96,6 +96,25 @@ export const get = async (req, res) => {
   }
 }
 
+export const getList = async (req, res) => {
+  try {
+    const works = await Work.find({ category: req.params.id }).select('_id name') // 只選取 _id 和 name 欄位
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `商品清單${req.params.id}取得成功`,
+      works,
+    })
+  } catch (error) {
+    console.log('controllers/work.js getAll')
+    console.error(error)
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: '伺服器內部錯誤',
+    })
+  }
+}
+
 export const update = async (req, res) => {
   try {
     // 檢查作品 ID 是否有效

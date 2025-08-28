@@ -80,7 +80,9 @@ export const uploadOne = (req, res, next) => {
     //   })
     // }
     // 繼續下一步
-    console.log('上傳成功:', req.file)
+    if (req.file) {
+      console.log('上傳成功:', req.file)
+    }
     next()
   })
 }

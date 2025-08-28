@@ -8,6 +8,7 @@ const router = Router()
 router.post('/add', auth.token, auth.admin, uploadImgs, work.create)
 // 要先宣告 /all , 才能宣告 /:id, 否則 /all 會被視為 id=all
 router.get('/all', auth.token, auth.admin, work.getAll)
+router.get('/list', auth.token, auth.admin, work.getList)
 router.get('/:id', work.getId)
 router.get('/', work.get)
 
