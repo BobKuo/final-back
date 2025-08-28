@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose'
+import Series from './series.js'
 
 const statisticsSchema = new Schema(
   {
@@ -24,27 +25,23 @@ const schema = new Schema(
       trim: true,
       minlength: [1, '標題至少需要 1 個字元'],
       maxlength: [100, '標題最多只能有 100 個字元'],
+      unique: true, // 名稱必須唯一
     },
     content: {
       type: String,
       maxlength: [500, '內容最多只能有 500 個字元'],
     },
     category: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'series',
       required: [true, '分類是必填的'],
-      enum: {
-        values: [
-          '普迪系列',
-          '幾何動物',
-          '字母系列',
-          '白日夢系列',
-          '動物喝茶',
-          '注音系列',
-          '365日常',
-          '生活雜記',
-          '其他',
-        ],
-        message: '請選擇有效的分類',
+      validate: {
+        validator: async function (value) {
+          // 檢查 category 是否存在於 series 集合的 name 欄位中
+          const series = await Series.findById(value)
+          return !!series // 如果找到對應的 series，則驗證通過
+        },
+        message: '分類必須是有效的系列名稱',
       },
     },
     tags: [

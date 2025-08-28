@@ -8,6 +8,7 @@ const schema = new Schema(
       trim: true,
       minlength: [1, '標題至少需要 1 個字元'],
       maxlength: [10, '標題最多只能有 10 個字元'],
+      unique: true, // 名稱必須唯一
     },
     description: {
       type: String,
@@ -15,14 +16,19 @@ const schema = new Schema(
     },
     cover: {
       type: String,
-      required: [true, '封面圖片是必填的'],
     },
     works: [
       {
         type: Schema.Types.ObjectId,
         ref: 'works',
+        default: [],
       },
     ],
+    post: {
+      type: Boolean,
+      default: true,
+      required: [true, '是否上首頁是必填的'],
+    },
   },
   { versionKey: false, timestamps: true },
 )

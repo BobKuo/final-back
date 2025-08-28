@@ -88,8 +88,6 @@ export const update = async (req, res) => {
       new Error('PRODUCT NOT FOUND'),
     )
 
-    console.log('===== 圖片的陣列 ===== :', existingProduct.images)
-
     // 如果有刪除圖片的需求，先處理刪除圖片
     const delimgs = JSON.parse(req.body.deletedImages || '[]')
 

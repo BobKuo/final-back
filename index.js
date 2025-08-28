@@ -8,6 +8,7 @@ import productRouter from './routes/product.js'
 import orderRouter from './routes/order.js'
 import workRouter from './routes/work.js'
 import tagRouter from './routes/tag.js'
+import seriesRouter from './routes/series.js'
 import './passport.js'
 
 mongoose
@@ -41,6 +42,7 @@ app.use('/product', productRouter)
 app.use('/order', orderRouter)
 app.use('/work', workRouter)
 app.use('/tag', tagRouter)
+app.use('/series', seriesRouter)
 
 // 處理未定義的路由
 app.all(/.*/, (req, res) => {

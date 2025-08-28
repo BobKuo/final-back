@@ -52,7 +52,9 @@ export const create = async (req, res) => {
 // 含未上架的商品
 export const getAll = async (req, res) => {
   try {
-    const works = await Work.find().populate('tags') // 取得 tags 的名稱
+    const works = await Work.find()
+      .populate('tags') // 取得 tags 的名稱
+      .populate('category', ['_id', 'name'])
 
     // 取得標籤名稱的陣列
     const worksWithEnabledTags = works.map((work) => ({
