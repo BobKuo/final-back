@@ -59,14 +59,15 @@ export const getAll = async (req, res) => {
 // 僅取得上架的商品
 export const get = async (req, res) => {
   try {
-    const series = await Series.find({ post: true })
+    const series = await Series.find({ post: true }).populate('works') // 取得 works
+
     res.status(StatusCodes.OK).json({
       success: true,
       message: '系列列表取得成功',
-      series,
+      series: series,
     })
   } catch (error) {
-    console.log('controllers/series.js get')
+    console.log('controllers/series.js getAll')
     console.error(error)
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
@@ -121,7 +122,7 @@ export const update = async (req, res) => {
         runValidators: true,
       },
     )
-      .populate('works', 'name, images')
+      .populate('works', ['_id', 'name', 'images'])
       .orFail(new Error('Series NOT FOUND'))
 
     res.status(StatusCodes.OK).json({

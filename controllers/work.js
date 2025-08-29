@@ -98,11 +98,15 @@ export const get = async (req, res) => {
 
 export const getList = async (req, res) => {
   try {
-    const works = await Work.find({ category: req.params.id }).select('_id name') // 只選取 _id 和 name 欄位
+    console.log('取得商品清單:', req.body)
+
+    const works = await Work.find(
+      req.body.series_id ? { category: req.body.series_id } : {},
+    ).select('_id name images') // 只選取 _id name images 欄位
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `商品清單${req.params.id}取得成功`,
+      message: `商品清單取得成功`,
       works,
     })
   } catch (error) {
