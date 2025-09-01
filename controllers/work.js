@@ -77,14 +77,21 @@ export const getAll = async (req, res) => {
   }
 }
 
-// 僅取得上架的商品
+// 僅取得上架的作品
 export const get = async (req, res) => {
   try {
-    const works = await Work.find({ post: true })
+    const works = await Work.find({ post: true }).populate('tags', 'name')
+
+    // 將 tags 轉換成只包含名稱的陣列
+    const worksWithTagNames = works.map((work) => ({
+      ...work.toObject(),
+      tags: work.tags.map((tag) => tag.name),
+    }))
+
     res.status(StatusCodes.OK).json({
       success: true,
       message: '作品列表取得成功',
-      works,
+      works: worksWithTagNames,
     })
   } catch (error) {
     console.log('controllers/work.js get')
