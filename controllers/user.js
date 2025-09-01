@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes'
 import jwt from 'jsonwebtoken'
 import validator from 'validator'
 import Product from '../models/product.js'
+import Work from '../models/work.js'
 
 export const create = async (req, res) => {
   try {
@@ -197,6 +198,96 @@ export const getCart = async (req, res) => {
       // 關聯 cart.product 的 ref 指定的 collection，只取 name 欄位
       // .populate('cart.product', 'name')
       .populate('cart.product')
+      .orFail(new Error('USER NOT FOUND'))
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: '',
+      result: user.cart,
+    })
+  } catch (error) {
+    if (error.message === 'USER ID') {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: '使用者 ID 格式錯誤',
+      })
+    } else if (error.message === 'USER NOT FOUND') {
+      res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: '使用者不存在',
+      })
+    } else {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: '伺服器內部錯誤',
+      })
+    }
+  }
+}
+
+export const addFavorite = async (req, res) => {
+  try {
+    // 驗證請求的作品 ID
+    if (!validator.isMongoId(req.body.work)) {
+      throw new Error('WORK ID')
+    }
+    // 檢查作品是否存在
+    await Work.findOne({ _id: req.body.work }).orFail(new Error('WORK NOT FOUND'))
+
+    // 檢查收藏夾中是否已經有該作品
+    const i = req.user.favorites.findIndex((item) => item.toString() === req.body.work)
+
+    // 如果收藏夾中沒有該作品, 則新增作品到收藏夾
+    if (i < 0) {
+      req.user.favorites.push(req.body.work)
+      // 保存
+      await req.user.save()
+    }
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: '',
+    })
+  } catch (error) {
+    console.error(error)
+    if (error.message === 'USER ID') {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: '使用者 ID 格式錯誤',
+      })
+    } else if (error.message === 'PRODUCT ID') {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: '作品 ID 格式錯誤',
+      })
+    } else if (error.message === 'WORK NOT FOUND') {
+      res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: '作品不存在',
+      })
+    } else if (error.message === 'USER NOT FOUND') {
+      res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: '使用者不存在',
+      })
+    } else {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: '伺服器內部錯誤',
+      })
+    }
+  }
+}
+
+export const getFavorites = async (req, res) => {
+  try {
+    // email account        --> 只取 email 和 account 欄位
+    // -password -email     --> 除了 password 和 email 以外的欄位
+    const user = await User.findById(req.user._id, 'favorites')
+      // .populate(ref欄位, 指定取的欄位)
+      // 關聯 favorites.work 的 ref 指定的 collection，只取 name 欄位
+      // .populate('favorites.work', 'name')
+      .populate('favorites.work')
       .orFail(new Error('USER NOT FOUND'))
 
     res.status(StatusCodes.OK).json({
