@@ -2,6 +2,7 @@ import Work from '../models/work.js'
 import { StatusCodes } from 'http-status-codes'
 import validator from 'validator'
 import { deleteCloudOne } from '../utils/cloudimg.js'
+import mongoose, { trusted } from 'mongoose'
 
 export const create = async (req, res) => {
   try {
@@ -110,6 +111,27 @@ export const getList = async (req, res) => {
     const works = await Work.find(
       req.body.series_id ? { category: req.body.series_id } : {},
     ).select('_id name images') // 只選取 _id name images 欄位
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `商品清單取得成功`,
+      works,
+    })
+  } catch (error) {
+    console.log('controllers/work.js getAll')
+    console.error(error)
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: '伺服器內部錯誤',
+    })
+  }
+}
+
+export const getIds = async (req, res) => {
+  try {
+    console.log('取得商品清單:', req.body)
+
+    const works = await Work.find(req.body.ids ? { _id: trusted({ $in: req.body.ids }) } : {})
 
     res.status(StatusCodes.OK).json({
       success: true,

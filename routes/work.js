@@ -14,6 +14,8 @@ router.get('/', work.get)
 //:id 這邊設定 req.params.id
 router.patch('/:id', auth.token, auth.admin, uploadImgs, work.update)
 
-//
+// 依照系列取得商品清單
 router.post('/list', auth.token, auth.admin, work.getList)
+// 依照作品ID陣列取得作品清單
+router.post('/ids', auth.token, work.getIds)
 export default router

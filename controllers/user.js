@@ -56,6 +56,7 @@ export const login = async (req, res) => {
         account: req.user.account,
         role: req.user.role,
         cartTotal: req.user.cartTotal,
+        favorites: req.user.favorites,
         token,
       },
     })
@@ -76,6 +77,7 @@ export const profile = (req, res) => {
       account: req.user.account,
       role: req.user.role,
       cartTotal: req.user.cartTotal,
+      favorites: req.user.favorites,
     },
   })
 }
@@ -225,7 +227,7 @@ export const getCart = async (req, res) => {
   }
 }
 
-export const addFavorite = async (req, res) => {
+export const favorites = async (req, res) => {
   try {
     // 驗證請求的作品 ID
     if (!validator.isMongoId(req.body.work)) {
@@ -238,15 +240,28 @@ export const addFavorite = async (req, res) => {
     const i = req.user.favorites.findIndex((item) => item.toString() === req.body.work)
 
     // 如果收藏夾中沒有該作品, 則新增作品到收藏夾
+    let message = ''
     if (i < 0) {
-      req.user.favorites.push(req.body.work)
-      // 保存
-      await req.user.save()
+      if (req.body.action == 'add') {
+        req.user.favorites.push(req.body.work)
+        // 保存
+        await req.user.save()
+
+        message = '新增收藏成功'
+      }
+    } else {
+      if (req.body.action == 'remove') {
+        req.user.favorites.splice(i, 1)
+        // 保存
+        await req.user.save()
+
+        message = '移除收藏成功'
+      }
     }
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: '',
+      message,
     })
   } catch (error) {
     console.error(error)
