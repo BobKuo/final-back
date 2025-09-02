@@ -13,6 +13,6 @@ router.delete('/logout', auth.token, user.logout)
 router.patch('/cart', auth.token, user.cart)
 router.get('/cart', auth.token, user.getCart)
 router.patch('/favorites', auth.token, user.favorites)
-router.get('/favorites', auth.token, user.getFavorites)
+router.patch('/goods', auth.token, user.goods)
 
 export default router

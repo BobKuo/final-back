@@ -18,17 +18,6 @@ const cartSchema = new Schema(
   { versionKey: false },
 )
 
-const favoriteSchema = new Schema(
-  {
-    work: {
-      type: Schema.Types.ObjectId,
-      ref: 'works',
-      required: [true, '作品 ID 是必填的'],
-    },
-  },
-  { versionKey: false },
-)
-
 const schema = new Schema(
   {
     account: {
@@ -61,6 +50,12 @@ const schema = new Schema(
       type: [cartSchema],
     },
     favorites: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'works',
+      },
+    ],
+    goods: [
       {
         type: Schema.Types.ObjectId,
         ref: 'works',

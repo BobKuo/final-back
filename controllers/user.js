@@ -57,6 +57,7 @@ export const login = async (req, res) => {
         role: req.user.role,
         cartTotal: req.user.cartTotal,
         favorites: req.user.favorites,
+        goods: req.user.goods,
         token,
       },
     })
@@ -78,6 +79,7 @@ export const profile = (req, res) => {
       role: req.user.role,
       cartTotal: req.user.cartTotal,
       favorites: req.user.favorites,
+      goods: req.user.goods,
     },
   })
 }
@@ -294,27 +296,58 @@ export const favorites = async (req, res) => {
   }
 }
 
-export const getFavorites = async (req, res) => {
+export const goods = async (req, res) => {
   try {
-    // email account        --> 只取 email 和 account 欄位
-    // -password -email     --> 除了 password 和 email 以外的欄位
-    const user = await User.findById(req.user._id, 'favorites')
-      // .populate(ref欄位, 指定取的欄位)
-      // 關聯 favorites.work 的 ref 指定的 collection，只取 name 欄位
-      // .populate('favorites.work', 'name')
-      .populate('favorites.work')
-      .orFail(new Error('USER NOT FOUND'))
+    // 驗證請求的作品 ID
+    if (!validator.isMongoId(req.body.work)) {
+      throw new Error('WORK ID')
+    }
+    // 檢查作品是否存在
+    await Work.findOne({ _id: req.body.work }).orFail(new Error('WORK NOT FOUND'))
+
+    // 檢查收藏夾中是否已經有該作品
+    const i = req.user.goods.findIndex((item) => item.toString() === req.body.work)
+
+    // 如果收藏夾中沒有該作品, 則新增作品到收藏夾
+    let message = ''
+    if (i < 0) {
+      if (req.body.action == 'add') {
+        req.user.goods.push(req.body.work)
+        // 保存
+        await req.user.save()
+
+        message = '新增作品成功'
+      }
+    } else {
+      if (req.body.action == 'remove') {
+        req.user.goods.splice(i, 1)
+        // 保存
+        await req.user.save()
+
+        message = '移除作品成功'
+      }
+    }
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: '',
-      result: user.cart,
+      message,
     })
   } catch (error) {
+    console.error(error)
     if (error.message === 'USER ID') {
       res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
         message: '使用者 ID 格式錯誤',
+      })
+    } else if (error.message === 'PRODUCT ID') {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: '作品 ID 格式錯誤',
+      })
+    } else if (error.message === 'WORK NOT FOUND') {
+      res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: '作品不存在',
       })
     } else if (error.message === 'USER NOT FOUND') {
       res.status(StatusCodes.NOT_FOUND).json({
