@@ -129,14 +129,25 @@ export const getList = async (req, res) => {
 
 export const getIds = async (req, res) => {
   try {
-    console.log('取得商品清單:', req.body)
+    // 因為在 index.js設定了 mongoose.set('sanitizeFilter', true)
+    // 所以在使用 $in 時需要使用 trusted() 特別處理
+    const works = await Work.find(
+      req.body.ids ? { _id: trusted({ $in: req.body.ids }) } : {},
+    ).populate('category', 'name')
 
-    const works = await Work.find(req.body.ids ? { _id: trusted({ $in: req.body.ids }) } : {})
+    // 根據原始 ids 陣列的順序重新排列結果
+    const orderedWorks = req.body.ids
+      .map((id) => works.find((work) => work._id.toString() === id.toString()))
+      .filter(Boolean) // 過濾掉 undefined（找不到的 id）
+      .reverse() // 反轉順序
 
     res.status(StatusCodes.OK).json({
       success: true,
       message: `商品清單取得成功`,
-      works,
+      works: orderedWorks.map((work) => ({
+        ...work.toObject(),
+        category: work.category.name,
+      })),
     })
   } catch (error) {
     console.log('controllers/work.js getAll')
